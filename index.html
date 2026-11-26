@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f1115">
+  <title>Ритм — Дисциплина дня</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #181b22;
+      --card-hover: #20242e;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #6366f1;
+      --accent-soft: rgba(99, 102, 241, 0.15);
+      --green: #10b981;
+      --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.15);
+      --border: #262a34;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 460px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .date-label {
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: capitalize;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .low-battery-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .low-battery-btn.active {
+      background: var(--amber-soft);
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+
+    /* Progress Bar */
+    .progress-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--green));
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: var(--card);
+      padding: 6px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 10px 0;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* Sections */
+    .section {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge-mini {
+      font-size: 11px;
+      color: var(--amber);
+      background: var(--amber-soft);
+      padding: 2px 8px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    body.low-battery .badge-mini {
+      display: inline-block;
+    }
+
+    /* Habit List */
+    .habit-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+
+    .habit-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .habit-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .checkbox {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      border: 2px solid var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .habit-item.done .checkbox {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .habit-item.done .checkbox::after {
+      content: "✓";
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .habit-text {
+      font-size: 15px;
+      transition: color 0.2s;
+    }
+
+    .habit-item.done .habit-text {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #525866;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .delete-btn:hover {
+      color: #ef4444;
+    }
+
+    .add-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Focus Tasks */
+    .task-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .task-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .task-row.done input {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    /* Timer */
+    .timer-display {
+      font-size: 48px;
+      font-weight: 700;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      margin: 10px 0 16px;
+      letter-spacing: 2px;
+    }
+
+    .timer-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-secondary.active-preset {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Mood / Check-in */
+    .mood-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .mood-btn {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 0;
+      font-size: 22px;
+      cursor: pointer;
+      transition: all 0.2s;
+      opacity: 0.6;
+    }
+
+    .mood-btn.selected {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    /* 7-day History */
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      text-align: center;
+    }
+
+    .day-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .day-box {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .day-name {
+      font-size: 11px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <div class="date-label" id="dateLabel">Сегодня</div>
+        <h1 id="greeting">Привет</h1>
+      </div>
+      <button class="low-battery-btn" id="lowBatteryBtn" onclick="toggleLowBattery()">
+        🔋 Минимум
+      </button>
+    </header>
+
+    <div class="progress-card">
+      <div class="progress-header">
+        <span>Прогресс дня</span>
+        <strong id="progressPercent">0%</strong>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn" data-tab="morning" onclick="switchTab('morning')">🌅 Утро</button>
+      <button class="tab-btn" data-tab="day" onclick="switchTab('day')">⚡️ День</button>
+      <button class="tab-btn" data-tab="evening" onclick="switchTab('evening')">🌙 Вечер</button>
+    </div>
+
+    <!-- УТРО -->
+    <div class="section" id="sec-morning">
+      <div class="card">
+        <div class="card-title">
+          <span>Утренний запуск</span>
+          <span class="badge-mini">Режим минимума</span>
+        </div>
+        <div id="morningList"></div>
+        <div class="add-row">
+          <input type="text" id="newMorningInput" placeholder="Добавить привычку...">
+          <button class="btn-primary" onclick="addHabit('morning')">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ДЕНЬ -->
+    <div class="section" id="sec-day">
+      <div class="card">
+        <div class="card-title">3 главные задачи дня</div>
+        <div id="tasksList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Таймер фокуса</div>
+        <div class="timer-display" id="timerDisplay">25:00</div>
+        <div class="timer-controls">
+          <button class="btn-primary" id="timerStartBtn" onclick="toggleTimer()">Старт</button>
+          <button class="btn-secondary" onclick="resetTimer()">Сброс</button>
+        </div>
+        <div class="timer-controls">
+          <button class="btn-secondary active-preset" id="preset25" onclick="setTimerPreset(25)">25 мин</button>
+          <button class="btn-secondary" id="preset45" onclick="setTimerPreset(45)">45 мин</button>
+          <button class="btn-secondary" id="preset10" onclick="setTimerPreset(10)">Перерыв 10</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ВЕЧЕР -->
+    <div class="section" id="sec-evening">
+      <div class="card">
+        <div class="card-title">
+          <span>Вечернее завершение</span>
+          <span class="badge-mini">Режим минимума</span>
+        </div>
+        <div id="eveningList"></div>
+        <div class="add-row">
+          <input type="text" id="newEveningInput" placeholder="Добавить привычку...">
+          <button class="btn-primary" onclick="addHabit('evening')">+</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Чек-ин дня</div>
+        <div class="mood-grid" id="moodGrid">
+          <button class="mood-btn" onclick="setMood(1)">😫</button>
+          <button class="mood-btn" onclick="setMood(2)">😕</button>
+          <button class="mood-btn" onclick="setMood(3)">😐</button>
+          <button class="mood-btn" onclick="setMood(4)">🙂</button>
+          <button class="mood-btn" onclick="setMood(5)">🔥</button>
+        </div>
+        <textarea id="dayNote" rows="2" placeholder="Главная мысль или победа дня..." oninput="saveNote()"></textarea>
+      </div>
+    </div>
+
+    <!-- ИСТОРИЯ -->
+    <div class="card">
+      <div class="card-title">Последние 7 дней</div>
+      <div class="history-grid" id="historyGrid"></div>
+    </div>
+  </div>
+
+  <script>
+    const todayKey = new Date().toISOString().split('T')[0];
+
+    const defaultHabits = {
+      morning: [
+        { id: 'm1', text: 'Стакан воды после пробуждения', mini: 'Пару глотков воды' },
+        { id: 'm2', text: 'Умыться и базовый уход за кожей', mini: 'Просто умыться и крем' },
+        { id: 'm3', text: 'Зарядка / разминка 15 мин', mini: 'Потянуться 2 минуты' },
+        { id: 'm4', text: 'Определить 3 главные задачи', mini: 'Выбрать 1 главную задачу' }
+      ],
+      evening: [
+        { id: 'e1', text: 'Вечерний уход за собой', mini: 'Умыться перед сном' },
+        { id: 'e2', text: 'Убрать телефон за 30 мин до сна', mini: 'Включить режим «Не беспокоить»' },
+        { id: 'e3', text: 'Подготовить вещи на завтра', mini: 'Поставить телефон на зарядку' }
+      ]
+    };
+
+    // Загрузка настроек привычек
+    let habitsConfig = JSON.parse(localStorage.getItem('ritm_habits_config')) || defaultHabits;
+
+    // Загрузка данных по дням
+    let allDays = JSON.parse(localStorage.getItem('ritm_days_data')) || {};
+    if (!allDays[todayKey]) {
+      allDays[todayKey] = {
+        lowBattery: false,
+        checked: {},
+        tasks: [
+          { text: '', done: false },
+          { text: '', done: false },
+          { text: '', done: false }
+        ],
+        mood: 0,
+        note: '',
+        percent: 0
+      };
+    }
+
+    let dayData = allDays[todayKey];
+
+    function saveData() {
+      dayData.percent = calculateProgress();
+      allDays[todayKey] = dayData;
+      localStorage.setItem('ritm_days_data', JSON.stringify(allDays));
+      localStorage.setItem('ritm_habits_config', JSON.stringify(habitsConfig));
+      updateProgressUI();
+      renderHistory();
+    }
+
+    // Инициализация даты и приветствия
+    function initHeader() {
+      const now = new Date();
+      const options = { weekday: 'long', day: 'numeric', month: 'long' };
+      document.getElementById('dateLabel').textContent = now.toLocaleDateString('ru-RU', options);
+
+      const hour = now.getHours();
+      let greet = 'Добрый вечер';
+      let defaultTab = 'evening';
+      if (hour >= 5 && hour < 12) { greet = 'Доброе утро'; defaultTab = 'morning'; }
+      else if (hour >= 12 && hour < 18) { greet = 'Продуктивного дня'; defaultTab = 'day'; }
+      document.getElementById('greeting').textContent = greet;
+
+      switchTab(defaultTab);
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      document.querySelectorAll('.section').forEach(sec => {
+        sec.classList.toggle('active', sec.id === 'sec-' + tab);
+      });
+    }
+
+    function toggleLowBattery() {
+      dayData.lowBattery = !dayData.lowBattery;
+      applyLowBatteryUI();
+      renderHabits('morning');
+      renderHabits('evening');
+      saveData();
+    }
+
+    function applyLowBatteryUI() {
+      document.body.classList.toggle('low-battery', dayData.lowBattery);
+      document.getElementById('lowBatteryBtn').classList.toggle('active', dayData.lowBattery);
+    }
+
+    function renderHabits(period) {
+      const container = document.getElementById(period + 'List');
+      container.innerHTML = '';
+
+      habitsConfig[period].forEach(habit => {
+        const isDone = !!dayData.checked[habit.id];
+        const label = (dayData.lowBattery && habit.mini) ? habit.mini : habit.text;
+
+        const div = document.createElement('div');
+        div.className = 'habit-item' + (isDone ? ' done' : '');
+        div.innerHTML = `
+          <div class="habit-left" onclick="toggleHabit('${habit.id}')">
+            <div class="checkbox"></div>
+            <span class="habit-text">${label}</span>
+          </div>
+          <button class="delete-btn" onclick="deleteHabit('${period}', '${habit.id}')" title="Удалить">×</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function toggleHabit(id) {
+      dayData.checked[id] = !dayData.checked[id];
+      renderHabits('morning');
+      renderHabits('evening');
+      saveData();
+    }
+
+    function addHabit(period) {
+      const input = document.getElementById(period === 'morning' ? 'newMorningInput' : 'newEveningInput');
+      const val = input.value.trim();
+      if (!val) return;
+      habitsConfig[period].push({
+        id: period[0] + Date.now(),
+        text: val,
+        mini: val + ' (минимум)'
+      });
+      input.value = '';
+      renderHabits(period);
+      saveData();
+    }
+
+    function deleteHabit(period, id) {
+      habitsConfig[period] = habitsConfig[period].filter(h => h.id !== id);
+      delete dayData.checked[id];
+      renderHabits(period);
+      saveData();
+    }
+
+    function renderTasks() {
+      const container = document.getElementById('tasksList');
+      container.innerHTML = '';
+      dayData.tasks.forEach((task, idx) => {
+        const row = document.createElement('div');
+        row.className = 'task-row' + (task.done ? ' done' : '');
+        row.innerHTML = `
+          <div class="checkbox" style="cursor:pointer" onclick="toggleTask(${idx})"></div>
+          <input type="text" value="${task.text.replace(/"/g, '&quot;')}" placeholder="Задача #${idx + 1}" oninput="updateTaskText(${idx}, this.value)">
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function toggleTask(idx) {
+      dayData.tasks[idx].done = !dayData.tasks[idx].done;
+      renderTasks();
+      saveData();
+    }
+
+    function updateTaskText(idx, val) {
+      dayData.tasks[idx].text = val;
+      saveData();
+    }
+
+    function calculateProgress() {
+      const totalHabits = habitsConfig.morning.length + habitsConfig.evening.length;
+      const doneHabits = [...habitsConfig.morning, ...habitsConfig.evening].filter(h => dayData.checked[h.id]).length;
+
+      const activeTasks = dayData.tasks.filter(t => t.text.trim() !== '');
+      const doneTasks = activeTasks.filter(t => t.done).length;
+
+      const total = totalHabits + activeTasks.length;
+      if (total === 0) return 0;
+      return Math.round(((doneHabits + doneTasks) / total) * 100);
+    }
+
+    function updateProgressUI() {
+      const pct = calculateProgress();
+      document.getElementById('progressPercent').textContent = pct + '%';
+      document.getElementById('progressFill').style.width = pct + '%';
+    }
+
+    // Чек-ин
+    function setMood(val) {
+      dayData.mood = val;
+      renderMood();
+      saveData();
+    }
+
+    function renderMood() {
+      const btns = document.querySelectorAll('.mood-btn');
+      btns.forEach((btn, idx) => {
+        btn.classList.toggle('selected', dayData.mood === idx + 1);
+      });
+      document.getElementById('dayNote').value = dayData.note || '';
+    }
+
+    function saveNote() {
+      dayData.note = document.getElementById('dayNote').value;
+      saveData();
+    }
+
+    // История за 7 дней
+    function renderHistory() {
+      const grid = document.getElementById('historyGrid');
+      grid.innerHTML = '';
+      const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().split('T')[0];
+        const data = allDays[key];
+        const pct = data ? (data.percent || 0) : 0;
+
+        let bg = 'var(--bg)';
+        let color = 'var(--muted)';
+        if (pct >= 80) { bg = 'rgba(16, 185, 129, 0.35)'; color = '#fff'; }
+        else if (pct >= 40) { bg = 'rgba(99, 102, 241, 0.35)'; color = '#fff'; }
+        else if (pct > 0) { bg = 'rgba(99, 102, 241, 0.15)'; color = '#d1d5db'; }
+
+        const col = document.createElement('div');
+        col.className = 'day-col';
+        col.innerHTML = `
+          <div class="day-box" style="background:${bg}; color:${color}; ${i === 0 ? 'border-color: var(--accent);' : ''}">
+            ${pct > 0 ? pct + '%' : '—'}
+          </div>
+          <span class="day-name">${dayNames[d.getDay()]}</span>
+        `;
+        grid.appendChild(col);
+      }
+    }
+
+    // Таймер
+    let timerSeconds = 25 * 60;
+    let currentPreset = 25;
+    let timerInterval = null;
+
+    function updateTimerDisplay() {
+      const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+      const s = String(timerSeconds % 60).padStart(2, '0');
+      document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('timerStartBtn');
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.textContent = 'Старт';
+      } else {
+        btn.textContent = 'Пауза';
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            btn.textContent = 'Старт';
+            alert('Время вышло! Отличная работа.');
+          }
+        }, 1000);
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      document.getElementById('timerStartBtn').textContent = 'Старт';
+      timerSeconds = currentPreset * 60;
+      updateTimerDisplay();
+    }
+
+    function setTimerPreset(mins) {
+      currentPreset = mins;
+      document.querySelectorAll('#preset25, #preset45, #preset10').forEach(b => b.classList.remove('active-preset'));
+      document.getElementById('preset' + mins).classList.add('active-preset');
+      resetTimer();
+    }
+
+    // Старт
+    initHeader();
+    applyLowBatteryUI();
+    renderHabits('morning');
+    renderHabits('evening');
+    renderTasks();
+    renderMood();
+    updateProgressUI();
+    renderHistory();
+  </script>
+</body>
+</html>
